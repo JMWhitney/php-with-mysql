@@ -13,10 +13,10 @@
 
 <div id="content">
   <div class="subjects listing">
-    <h1>Subjects</h1>
+    <h1>Pages</h1>
 
     <div class="actions">
-      <a class="action" href="">Create New Subject</a>
+      <a class="action" href="<?php echo url_for('/staff/pages/new.php'); ?>">Create New Page</a>
     </div>
 
   	<table class="list">
@@ -39,7 +39,7 @@
           <td><a class="action" href=
             "<?php echo url_for('/staff/pages/show.php?id=' . htmlspecialchars(urlencode($pages['id']))); ?>"
           >View</a></td>
-          <td><a class="action" href="">Edit</a></td>
+          <td><a class="action" href="<?php echo url_for('/staff/pages/edit.php?id=' . htmlspecialchars(urlencode($pages['id']))); ?>">Edit</a></td>
           <td><a class="action" href="">Delete</a></td>
     	  </tr>
       <?php } ?>
