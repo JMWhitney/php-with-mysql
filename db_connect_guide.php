@@ -25,6 +25,11 @@ if(mysqli_connect_errno()) {
 $query = "SELECT * FROM subjects";
 $result_set = mysqli_query($connection, $query);
 
+//Test if query succeeded
+if(!$result_set) {
+    exit("Database query failed.");
+}
+
 // 3. Use returned data (if any)
 while($subject = mysqli_fetch_assoc($result_set)) {
     echo $subject["menu_name"] . "<br />";

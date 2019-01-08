@@ -1,14 +1,12 @@
 <?php require_once('../../../private/initialize.php'); ?>
 
 <?php
-  $pages = [
-    ['id' => '1', 'position' => '1', 'visible' => '1', 'menu_name' => 'Globe Bank'],
-    ['id' => '2', 'position' => '2', 'visible' => '1', 'menu_name' => 'History'],
-    ['id' => '3', 'position' => '3', 'visible' => '1', 'menu_name' => 'Leadership'],
-    ['id' => '4', 'position' => '4', 'visible' => '1', 'menu_name' => 'Contact Us'],
-  ];
-  ?>
 
+  $page_set = find_all_pages();
+
+?>
+
+<?php $page_title = 'Pages'; ?>
 <?php include(SHARED_PATH . '/staff_header.php'); ?>
 
 <div id="content">
@@ -30,9 +28,10 @@
         <th>&nbsp;</th>
   	  </tr>
 
-      <?php foreach($pages as $pages) { ?>
+      <?php while($pages = mysqli_fetch_assoc($page_set)) { ?>
         <tr>
           <td><?php echo htmlspecialchars($pages['id']); ?></td>
+          <td><?php echo htmlspecialchars($pages['subject_id']); ?></td>
           <td><?php echo htmlspecialchars($pages['position']); ?></td>
           <td><?php echo $pages['visible'] == 1 ? 'true' : 'false'; ?></td>
     	    <td><?php echo htmlspecialchars($pages['menu_name']); ?></td>
@@ -44,6 +43,10 @@
     	  </tr>
       <?php } ?>
   	</table>
+
+    <?php
+      mysqli_free_result($page_set);
+    ?>
 
   </div>
 </div>
