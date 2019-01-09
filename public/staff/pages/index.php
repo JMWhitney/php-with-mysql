@@ -21,6 +21,7 @@
   	  <tr>
         <th>ID</th>
         <th>Position</th>
+        <th>Menu Name</th>
         <th>Visible</th>
   	    <th>Name</th>
   	    <th>&nbsp;</th>
@@ -28,18 +29,19 @@
         <th>&nbsp;</th>
   	  </tr>
 
-      <?php while($pages = mysqli_fetch_assoc($page_set)) { ?>
+      <?php while($page = mysqli_fetch_assoc($page_set)) { ?>
+        <?php $subject = find_subject_by_id($page['subject_id']); ?>
         <tr>
-          <td><?php echo htmlspecialchars($pages['id']); ?></td>
-          <td><?php echo htmlspecialchars($pages['subject_id']); ?></td>
-          <td><?php echo htmlspecialchars($pages['position']); ?></td>
-          <td><?php echo $pages['visible'] == 1 ? 'true' : 'false'; ?></td>
-    	    <td><?php echo htmlspecialchars($pages['menu_name']); ?></td>
+          <td><?php echo htmlspecialchars($page['id']); ?></td>
+          <td><?php echo htmlspecialchars($subject['menu_name']); ?></td>
+          <td><?php echo htmlspecialchars($page['position']); ?></td>
+          <td><?php echo $page['visible'] == 1 ? 'true' : 'false'; ?></td>
+    	    <td><?php echo htmlspecialchars($page['menu_name']); ?></td>
           <td><a class="action" href=
-            "<?php echo url_for('/staff/pages/show.php?id=' . htmlspecialchars(urlencode($pages['id']))); ?>"
+            "<?php echo url_for('/staff/pages/show.php?id=' . htmlspecialchars(urlencode($page['id']))); ?>"
           >View</a></td>
-          <td><a class="action" href="<?php echo url_for('/staff/pages/edit.php?id=' . htmlspecialchars(urlencode($pages['id']))); ?>">Edit</a></td>
-          <td><a class="action" href="">Delete</a></td>
+          <td><a class="action" href="<?php echo url_for('/staff/pages/edit.php?id=' . htmlspecialchars(urlencode($page['id']))); ?>">Edit</a></td>
+          <td><a class="action" href="<?php echo url_for('/staff/pages/delete.php?id=' . htmlspecialchars(urlencode($page['id']))); ?>">Delete</a></td>
     	  </tr>
       <?php } ?>
   	</table>

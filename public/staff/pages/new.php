@@ -15,6 +15,7 @@ if(is_post_request()) {
   $result = insert_page($page);
   $new_id = mysqli_insert_id($db);
   redirect_to(url_for('/staff/pages/show.php?id=' . $new_id));
+  
 } else {
 
   //Initialize an empty assoc array
@@ -45,6 +46,7 @@ if(is_post_request()) {
     <h1>Create Page</h1>
 
     <form action="<?php echo url_for('/staff/pages/new.php'); ?>" method="post">
+
       <dl>
         <dt>Subject</dt>
         <dd>
@@ -60,19 +62,24 @@ if(is_post_request()) {
             }
             mysqli_free_result($subject_set);
           ?>
+          </select>
         </dd>
+      </dl>
+
+      <dl>
         <dt>Menu Name</dt>
         <dd>
           <input type="text" name="menu_name" value="<?php echo htmlspecialchars($page['menu_name']); ?>" />
         </dd>
       </dl>
+
       <dl>
         <dt>Position</dt>
         <dd>
           <select name="position">
             <?php
               for($i = 1; $i <= $page_count; $i++) {
-                echo '<option value="{$i}"';
+                echo "<option value=\"{$i}\"";
                 if($page["position"] == $i) {
                   echo " selected";
                 }
@@ -82,6 +89,7 @@ if(is_post_request()) {
           </select>
         </dd>
       </dl>
+
       <dl>
         <dt>Visible</dt>
         <dd>
@@ -90,11 +98,15 @@ if(is_post_request()) {
           <?php if($page['visible'] == "1") { echo " checked"; } ?>
           />
         </dd>
+      </dl>
+
+      <dl>
         <dt>Content</dt>
         <dd>
           <input type="text" name="menu_name" value="<?php echo htmlspecialchars($page['content']); ?>" />
         </dd>
       </dl>
+
       <div id="operations">
         <input type="submit" value="Create Page" />
       </div>
