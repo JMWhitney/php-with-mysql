@@ -22,8 +22,32 @@ if(mysqli_connect_errno()) {
 }
 
 // 2. Perform database query
+// ** MAKE SURE TO SANITIZE AND DELIMIT (single quotes around data)
+// ALL DYNAMIC QUERIES TO PREVENT SQL INJECTION ATTACKS. **
+// You can also use prepared statements to prevent SQL injection
+// e.g. mysqli_real_escape_string($connection, $string);
+
 $query = "SELECT * FROM subjects";
 $result_set = mysqli_query($connection, $query);
+
+//2.5 Prepared statement example
+
+$sql = "SELECT id, first_name,last_name ";
+$sql .= "FROM users ";
+$sql .= "WHERE username = ? AND password = ?";
+$stmt = mysqli_prepare($connection, $sql);
+
+mysqli_stmt_bind_param($stmt, 'ss', $username, $password);
+
+mysqli_stmt_execute($stmt);
+
+mysqli_stmt_bind_result($stmt, $id, $first_name, $last_name);
+
+mysqli_stmt_fetch($stmt);
+
+mysqli_stmt_close($stmt);
+
+// End prepared statement example
 
 //Test if query succeeded
 if(!$result_set) {

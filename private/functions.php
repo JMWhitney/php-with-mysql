@@ -31,4 +31,24 @@
     return $_SERVER['REQUEST_METHOD'] == 'GET';
   }
 
+  function display_errors($errors=array()) {
+    $output = '';
+    if(!empty($errors)) {
+      $output .= "<div class=\"errors\">";
+      $output .= "Please fix the following errors:";
+      $output .= "<ul>";
+      foreach($errors as $error) {
+        $output .= "<li>" . htmlspecialchars($error) . "</li>";
+      }
+      $output .= "</ul>";
+      $output .= "</div>";
+    }
+    return $output;
+  }
+
+  function db_escape($connection, $string) {
+    return mysqli_real_escape_string($connection, $string);
+  }
+  
+
 ?>
