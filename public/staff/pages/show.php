@@ -13,6 +13,8 @@ $page = find_page_by_id($id);
 <div id="content">
 
     <a class="back-link" href="<?php echo url_for('/staff/pages/index.php'); ?>">&laquo; Back to List</a>
+    <br />
+    <a class="preview" href="<?php echo url_for('/public/index.php'); ?>">Preview page</a>
 
     <div class="page show">
     <h1>Page: <?php echo htmlspecialchars($page['menu_name']); ?></h1>

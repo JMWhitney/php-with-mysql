@@ -100,13 +100,9 @@ mysqli_free_result($page_set);
         </dd>
       </dl>
       <dl>
-          <dt></dt>
+          <dt>Content</dt>
           <dd>
-            <textarea name="content" cols="60" rows="10">
-              <?php
-                echo htmlspecialchars($page['content']);
-              ?>
-            </textarea>
+            <textarea name="content" cols="60" rows="10"><?php echo htmlspecialchars($page['content']); ?></textarea>
           </dd>
       </dl>
       <div id="operations">

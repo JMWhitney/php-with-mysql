@@ -108,10 +108,10 @@ mysqli_free_result($page_set);
       </dl>
 
       <dl>
-        <dt>Content</dt>
-        <dd>
-          <input type="text" name="content" value="<?php echo htmlspecialchars($page['content']); ?>" />
-        </dd>
+      <dt>Content</dt>
+          <dd>
+            <textarea name="content" cols="60" rows="10"><?php echo htmlspecialchars($page['content']); ?></textarea>
+          </dd>
       </dl>
 
       <div id="operations">
