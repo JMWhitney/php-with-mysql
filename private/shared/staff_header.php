@@ -18,6 +18,10 @@
 
     <nav>
       <ul>
+        <li>User: <?php echo $_SESSION['username'] ?? '' ?></li>
         <li><a href="<?php echo WWW_ROOT . '/staff/index.php'; ?>">Menu</a></li>
+        <li><a href="<?php echo WWW_ROOT . '/staff/logout.php'; ?>">Logout</a></li>
       </ul>
     </nav>
+
+    <?php echo display_session_message(); ?>

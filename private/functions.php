@@ -1,9 +1,9 @@
 <?php
 
     function url_for($script_path) {
-        // add the leading '/' if not present
-        if($script_path[0] != '/') {
-        $script_path = "/" . $script_path;
+    // add the leading '/' if not present
+    if($script_path[0] != '/') {
+      $script_path = "/" . $script_path;
     }
     return WWW_ROOT . $script_path;
   }
@@ -48,6 +48,21 @@
 
   function db_escape($connection, $string) {
     return mysqli_real_escape_string($connection, $string);
+  }
+
+  function get_and_clear_session_message() {
+    if(isset($_SESSION['message']) && $_SESSION['message'] != '') {
+      $msg = $_SESSION['message'];
+      unset($_SESSION['message']);
+      return $msg;
+    }
+  }
+
+  function display_session_message() {
+    $msg = get_and_clear_session_message();
+    if(!is_blank($msg)) {
+      return '<div id="message">' . htmlspecialchars($msg) . '</div>';
+    }
   }
   
 
