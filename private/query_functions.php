@@ -213,7 +213,6 @@
         $sql = "DELETE FROM pages ";
         $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
         $sql .= "LIMIT 1";
-        echo $sql;
         $result = mysqli_query($db, $sql);
 
         //For DELETE statements, $result is true/false. 
@@ -254,7 +253,7 @@
         global $db;
 
         $sql = "SELECT * FROM admins ";
-        $sql .= "ORDER BY username ASC, id ASC";
+        $sql .= "ORDER BY last_name ASC, first_name ASC";
         $result = mysqli_query($db, $sql);
         confirm_result_set($result);
         return $result;
@@ -265,6 +264,20 @@
 
         $sql = "SELECT * FROM admins ";
         $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
+        $sql .= "LIMIT 1";
+        $result = mysqli_query($db, $sql);
+        confirm_result_set($result);
+        $admin = mysqli_fetch_assoc($result);
+        mysqli_free_result($result);
+        return $admin; //Returns an associative array
+    }
+
+    function find_admin_by_username($username) {
+        global $db;
+
+        $sql = "SELECT * FROM admins ";
+        $sql .= "WHERE username='" . db_escape($db, $username) . "' ";
+        $sql .= "LIMIT 1";
         $result = mysqli_query($db, $sql);
         confirm_result_set($result);
         $admin = mysqli_fetch_assoc($result);
@@ -280,21 +293,24 @@
             return $errors;
         }
 
+        $hashed_password = password_hash($admin['password'], PASSWORD_BCRYPT);
+
         $sql = "INSERT INTO admins ";
-        $sql .= "(subject_id, menu_name, position, visible, content) ";
+        $sql .= "(first_name, last_name, email, username, hashed_password) ";
         $sql .= "VALUES (";
-        $sql .= "'" . db_escape($db, $page['subject_id']) . "', ";
-        $sql .= "'" . db_escape($db, $page['menu_name']) . "', ";
-        $sql .= "'" . db_escape($db, $page['position']) . "', ";
-        $sql .= "'" . db_escape($db, $page['visible']) . "', ";
-        $sql .= "'" . db_escape($db, $page['content']) . "' ";
+        $sql .= "'" . db_escape($db, $admin['first_name']) . "', ";
+        $sql .= "'" . db_escape($db, $admin['last_name']) . "', ";
+        $sql .= "'" . db_escape($db, $admin['email']) . "', ";
+        $sql .= "'" . db_escape($db, $admin['username']) . "', ";
+        $sql .= "'" . db_escape($db, $hashed_password) . "'";
         $sql .= ")";
+
         $result = mysqli_query($db, $sql);
         //For INSERT statements, $result is true/false
         if($result) {
             return true;
         } else {
-            //INSERT failed
+            //INSERT statement failed
             echo mysqli_error($db);
             db_disconnect($db);
             exit;
@@ -302,11 +318,60 @@
     }
 
     function update_admin($admin) {
+        global $db;
 
+        //If a password was given, update database with validated password. 
+        //Otherwise don't run password validation and don't change password data.
+        $password_sent = !is_blank($admin['password']);
+
+        $errors = validate_admin($admin, ['password_required' => $password_sent]);
+        if(!empty($errors)) {
+            return $errors;
+        }
+
+        $hashed_password = password_hash($admin['password'], PASSWORD_BCRYPT);
+        
+        //Construct SQL query
+        $sql = "UPDATE admins SET ";
+        $sql .= "first_name='" . db_escape($db, $admin['first_name']) . "', ";
+        $sql .= "last_name='" . db_escape($db, $admin['last_name']) . "', ";
+        $sql .= "email='" . db_escape($db, $admin['email']) . "', ";
+        if($password_sent) {
+            $sql .= "hashed_password='" . db_escape($db, $hashed_password) . "', ";
+        }
+        $sql .= "username='" . db_escape($db, $admin['username']) . "' ";
+        $sql .= "WHERE id='" . db_escape($db, $admin['id']) . "' ";
+        $sql .= "LIMIT 1;";   //Not strictly necessary, but will prevent overwritting other information in the event of an error
+        
+        $result = mysqli_query($db, $sql);
+        //For UPDATE statements, $result is true/false
+        if($result) {
+            return true;
+        } else {
+            //UPDATE failed
+            echo mysqli_error($db);
+            db_disconnect($db);
+            exit;
+        }
     }
 
     function delete_admin($admin) {
+        global $db;
 
+        $sql = "DELETE FROM admins ";
+        $sql .= "WHERE id='" . db_escape($db, $admin['$id']) . "' ";
+        $sql .= "LIMIT 1;";
+        $result = mysqli_query($db, $sql);
+
+        //For DELETE statements, $result is true/false. 
+        if($result) {
+            return true;
+        } else {
+            //DELETE failed
+            echo mysqli_error($db);
+            db_disconnect($db);
+            exit;
+        }
     }
 
 ?>

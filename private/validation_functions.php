@@ -123,11 +123,11 @@
     $sql .= "AND id != '" . db_escape($db, $current_id) . "'";
 
     //Retrieve all admin users that match the query from the database
-    $user_set = mysqli_query($db, $sql);
-    $user_count = mysqli_num_rows($user_set);
-    mysqli_free_result($user_set);
+    $admin_set = mysqli_query($db, $sql);
+    $admin_count = mysqli_num_rows($admin_set);
+    mysqli_free_result($admin_set);
 
-    return $user_count === 0;
+    return $admin_count === 0;
   }
 
   function validate_subject($subject) {
@@ -208,7 +208,10 @@
 
   }
 
-  function validate_admin($admin) {
+  function validate_admin($admin, $options=[]) {
+
+    $password_required = $options['password_required'] ?? true;
+
     $errors = [];
 
     //First name
@@ -232,19 +235,53 @@
       $errors[] = "Email cannot be blank.";
     } 
     elseif(!has_length($admin['email'], ['max' => 255])) {
-      $errors[] = "Email must be shorter than 255 characters.";
+      $errors[] = "Email must be less than 255 characters.";
+    } 
+    elseif(!has_valid_email_format($admin['email'])) {
+      $errors[] = "Email must be a valid format.";
     }
 
     //Username 
-    if(!has_length($admin['username'], ['min' => 8 , 'max' => 255])) {
-      $errors[] ="Username must be between 8 and 255 characters"
+    if(is_blank($admin['username'])) {
+      $errors[] = "Username cannot be blank.";
     }
-    $current_id = $page['id'] ?? '0';
-    elseif(!has_unique_admin_username($page['menu_name'], $current_id)) {
-      $errors[] = "Menu name must be unique.";
+    elseif(!has_length($admin['username'], ['min' => 8 , 'max' => 255])) {
+      $errors[] ="Username must be between 8 and 255 characters.";
+    }
+    elseif(!has_unique_admin_username($admin['username'], $admin['id'] ?? '0')) {
+      $errors[] = "Username is already taken. Try another.";
     }
 
-
+    //Password
+    if($password_required) {
+      if(is_blank($admin['password'])) {
+        $errors[] = "Password cannot be blank.";
+      } 
+      elseif(!has_length($admin['email'], ['min' => 12, 'max' => 255])) {
+        $errors[] = "Email must be between 12 and 255 characters";
+      }  
+      elseif (!preg_match('/[A-Z]/', $admin['password'])) {
+        $errors[] = "Password must contain at least 1 uppercase letter";
+      } 
+      elseif (!preg_match('/[a-z]/', $admin['password'])) {
+        $errors[] = "Password must contain at least 1 lowercase letter";
+      } 
+      elseif (!preg_match('/[0-9]/', $admin['password'])) {
+        $errors[] = "Password must contain at least 1 number";
+      } 
+      elseif (!preg_match('/[^A-Za-z0-9\s]/', $admin['password'])) {
+        $errors[] = "Password must contain at least 1 symbol";
+      }
+  
+      if(is_blank($admin['confirm_password'])) {
+        $errors[] = "Please confirm your password.";
+      }
+      elseif ($admin['password'] !== $admin['confirm_password']) {
+        $errors[] = "Password and password confirmation must match.";
+      }
+    }
 
     return $errors;
+  }
+
 ?>

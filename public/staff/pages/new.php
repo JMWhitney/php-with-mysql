@@ -1,9 +1,9 @@
 <?php 
-
 require_once('../../../private/initialize.php');
 
-if(is_post_request()) {
+require_login();
 
+if(is_post_request()) {
   //Submit to the database
   $page = [];
   $page['subject_id'] = $_POST['subject_id'] ?? '';
@@ -22,7 +22,6 @@ if(is_post_request()) {
   }
   
 } else {
-
   //Initialize an empty assoc array
   $page = [];
   $page['subject_id'] = '';
@@ -30,15 +29,12 @@ if(is_post_request()) {
   $page['position'] = '';
   $page['visible'] = '';
   $page['content'] = '';
-
 }
-
 //Find the number of items in pages table. 
 //This is used to choose the correct position later in the UI.
 $page_set = find_all_pages();
 $page_count = mysqli_num_rows($page_set) + 1;
 mysqli_free_result($page_set);
-
 ?>
 
 <?php $page_title = 'Create Page'; ?>
@@ -110,9 +106,9 @@ mysqli_free_result($page_set);
 
       <dl>
       <dt>Content</dt>
-          <dd>
-            <textarea name="content" cols="60" rows="10"><?php echo htmlspecialchars($page['content']); ?></textarea>
-          </dd>
+        <dd>
+          <textarea name="content" cols="60" rows="10"><?php echo htmlspecialchars($page['content']); ?></textarea>
+        </dd>
       </dl>
 
       <div id="operations">

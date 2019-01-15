@@ -2,6 +2,8 @@
 
 require_once('../../../private/initialize.php');
 
+require_login();
+
 //Make sure we have an id value. Otherwise redirect to previous page
 if(!isset($_GET['id'])) {
   redirect_to(url_for('staff/subjects/index.php'));

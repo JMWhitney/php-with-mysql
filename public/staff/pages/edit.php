@@ -1,15 +1,14 @@
 <?php 
-
 require_once('../../../private/initialize.php');
+
+require_login();
 
 //Make sure we have an id value. Otherwise redirect to previous page
 if(!isset($_GET['id'])) {
     redirect_to(url_for('staff/pages/index.php'));
 }
 $id = $_GET['id'];
-
 if(is_post_request()) {
-
   // Handle form values sent by new.php
   $page = [];
   $page['id'] = $id;
@@ -26,15 +25,12 @@ if(is_post_request()) {
   } else {
     $errors = $result;
   }
-
 } else {
   $page = find_page_by_id($id);
 }
-
 $page_set = find_all_pages();
 $page_count = mysqli_num_rows($page_set);
 mysqli_free_result($page_set);
-
 ?>
 
 <?php $page_title = 'Edit Page'; ?>
