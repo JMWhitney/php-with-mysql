@@ -43,6 +43,8 @@
             return $errors;
         }
 
+        shift_subject_positions(0, $subject['position']);
+
         $sql = "INSERT INTO subjects ";
         $sql .= "(menu_name, position, visible) ";
         $sql .= "VALUES (";
@@ -69,6 +71,10 @@
         if(!empty($errors)) {
             return $errors;
         }
+
+        $old_subject = find_subject_by_id($subject['id']);
+        $old_position = $old_subject['position'];
+        shift_subject_positions($old_position, $subject['position'], $subject['id']);
         
         //Construct SQL query
         $sql = "UPDATE subjects SET ";
@@ -96,6 +102,10 @@
     function delete_subject($id) {
         global $db;
 
+        $old_subject = find_subject_by_id($id);
+        $old_position = $old_subject['position'];
+        shift_subject_positions($old_position, 0, $id);
+
         $sql = "DELETE FROM subjects ";
         $sql .= "WHERE id='" . $id . "' ";
         $sql .= "LIMIT 1";
@@ -112,6 +122,46 @@
             exit;
         }
     }
+
+    function shift_subject_positions($start_pos, $end_pos, $current_id=0) {
+        global $db;
+    
+        if($start_pos == $end_pos) { return; }
+    
+        $sql = "UPDATE subjects ";
+        if($start_pos == 0) {
+          // new item, +1 to items greater than $end_pos
+          $sql .= "SET position = position + 1 ";
+          $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
+        } elseif($end_pos == 0) {
+          // delete item, -1 from items greater than $start_pos
+          $sql .= "SET position = position - 1 ";
+          $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
+        } elseif($start_pos < $end_pos) {
+          // move later, -1 from items between (including $end_pos)
+          $sql .= "SET position = position - 1 ";
+          $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
+          $sql .= "AND position <= '" . db_escape($db, $end_pos) . "' ";
+        } elseif($start_pos > $end_pos) {
+          // move earlier, +1 to items between (including $end_pos)
+          $sql .= "SET position = position + 1 ";
+          $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
+          $sql .= "AND position < '" . db_escape($db, $start_pos) . "' ";
+        }
+        // Exclude the current_id in the SQL WHERE clause
+        $sql .= "AND id != '" . db_escape($db, $current_id) . "' ";
+    
+        $result = mysqli_query($db, $sql);
+        // For UPDATE statements, $result is true/false
+        if($result) {
+          return true;
+        } else {
+          // UPDATE failed
+          echo mysqli_error($db);
+          db_disconnect($db);
+          exit;
+        }
+      }
 
 
 
@@ -154,6 +204,8 @@
             return $errors;
         }
 
+        shift_page_positions(0, $page['position'], $page['subject_id']);
+
         $sql = "INSERT INTO pages ";
         $sql .= "(subject_id, menu_name, position, visible, content) ";
         $sql .= "VALUES (";
@@ -182,6 +234,10 @@
         if(!empty($errors)) {
             return $errors;
         }
+
+        $old_page = find_page_by_id($page['id']);
+        $old_position = $old_page['position'];
+        shift_page_positions($old_position, $page['position'], $page['subject_id'], $page['id']);
         
         //Construct SQL query
         $sql = "UPDATE pages SET ";
@@ -209,6 +265,10 @@
 
     function delete_page($id) {
         global $db;
+
+        $old_page = find_page_by_id($id);
+        $old_position = $old_page['position'];
+        shift_page_positions($old_position, 0, $old_page['subject_id'], $id);
 
         $sql = "DELETE FROM pages ";
         $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
@@ -242,6 +302,70 @@
         confirm_result_set($result);
         return $result;
     }
+
+
+    //This function is more efficient and straightforward than
+    //using find_pages_by_subject_id(), counting the number of returned pages, and freeing the result set.
+    //Use this instead in /pages/edit and /pages/new
+    function count_pages_by_subject_id($subject_id, $options=[]) {
+        global $db;
+    
+        $visible = $options['visible'] ?? false;
+    
+        $sql = "SELECT COUNT(id) FROM pages ";
+        $sql .= "WHERE subject_id='" . db_escape($db, $subject_id) . "' ";
+        if($visible) {
+          $sql .= "AND visible = true ";
+        }
+        $sql .= "ORDER BY position ASC";
+        $result = mysqli_query($db, $sql);
+        confirm_result_set($result);
+        $row = mysqli_fetch_row($result);
+        mysqli_free_result($result);
+        $count = $row[0];
+        return $count;
+      }
+
+      function shift_page_positions($start_pos, $end_pos, $subject_id, $current_id=0) {
+        global $db;
+    
+        if($start_pos == $end_pos) { return; }
+    
+        $sql = "UPDATE pages ";
+        if($start_pos == 0) {
+          // new item, +1 to items greater than $end_pos
+          $sql .= "SET position = position + 1 ";
+          $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
+        } elseif($end_pos == 0) {
+          // delete item, -1 from items greater than $start_pos
+          $sql .= "SET position = position - 1 ";
+          $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
+        } elseif($start_pos < $end_pos) {
+          // move later, -1 from items between (including $end_pos)
+          $sql .= "SET position = position - 1 ";
+          $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
+          $sql .= "AND position <= '" . db_escape($db, $end_pos) . "' ";
+        } elseif($start_pos > $end_pos) {
+          // move earlier, +1 to items between (including $end_pos)
+          $sql .= "SET position = position + 1 ";
+          $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
+          $sql .= "AND position < '" . db_escape($db, $start_pos) . "' ";
+        }
+        // Exclude the current_id in the SQL WHERE clause
+        $sql .= "AND id != '" . db_escape($db, $current_id) . "' ";
+        $sql .= "AND subject_id = '" . db_escape($db, $subject_id) . "'";
+    
+        $result = mysqli_query($db, $sql);
+        // For UPDATE statements, $result is true/false
+        if($result) {
+          return true;
+        } else {
+          // UPDATE failed
+          echo mysqli_error($db);
+          db_disconnect($db);
+          exit;
+        }
+      }
 
 
 
